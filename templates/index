@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>OTP Verification Demo</title>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <style>
+    .display__none { display: none; }
+    input, button { margin: 5px 0; padding: 8px; width: 250px; }
+    button { width: 260px; }
+  </style>
+</head>
+<body>
+  <h1>OTP Verification Demo</h1>
+  <form id="otpForm" onsubmit="return false;">
+    <input type="text" id="name" placeholder="Enter name" /><br />
+    <input type="number" id="prn" placeholder="Enter PRN" /><br />
+    <input type="email" id="email" placeholder="Enter email" /><br />
+    <input type="text" id="branch" placeholder="Enter branch" /><br />
+    <input type="text" id="phone_number_field" placeholder="Enter phone number" /><br />
+
+    <button type="button" id="sendOtpBtn">Send OTP</button>
+  </form>
+
+  <div id="otp-section" class="display__none">
+    <input type="text" id="otp_code_field" placeholder="Enter OTP" />
+    <button type="button" id="verifyOtpBtn">Verify OTP</button>
+  </div>
+
+  <h2 id="successMessage" class="display__none" style="color:green;">
+    OTP Verified Successfully!
+  </h2>
+
+  <script>
+    $('#sendOtpBtn').click(function() {
+      const phone = $('#phone_number_field').val().trim();
+      if (!phone) {
+        alert('Please enter phone number');
+        return;
+      }
+      const data = {
+        name: $('#name').val(),
+        prn: $('#prn').val(),
+        email: $('#email').val(),
+        branch: $('#branch').val(),
+        'phone-number': phone,
+      };
+      $.post('/getOTP', data)
+        .done(function(res) {
+          if (res.status === 'OTP sent') {
+            alert('OTP sent!');
+            $('#otp-section').removeClass('display__none');
+          } else {
+            alert('Error: ' + (res.error || 'Unknown error'));
+          }
+        })
+        .fail(function() {
+          alert('Failed to send OTP');
+        });
+    });
+
+    $('#verifyOtpBtn').click(function() {
+      const otp = $('#otp_code_field').val().trim();
+      if (!otp) {
+        alert('Please enter OTP');
+        return;
+      }
+      $.post('/verifyOTP', { 'verification-code': otp })
+        .done(function(res) {
+          if (res.status === 'success') {
+            $('#otpForm').hide();
+            $('#otp-section').hide();
+            $('#successMessage').removeClass('display__none');
+          } else {
+            alert('Verification failed: ' + (res.error || 'Unknown error'));
+          }
+        })
+        .fail(function() {
+          alert('Failed to verify OTP');
+        });
+    });
+  </script>
+</body>
+</html>
