@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Verify OTP</title>
+</head>
+<body>
+    <h2>OTP Verification</h2>
+    <form id="otp-form">
+        <label for="verification-code">Enter the OTP:</label>
+        <input type="text" id="verification-code" name="verification-code" required>
+        <button type="submit">Verify OTP</button>
+    </form>
+
+    <div id="message"></div>
+
+    <script>
+        const form = document.getElementById('otp-form');
+        const messageDiv = document.getElementById('message');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(form);
+
+            const res = await fetch('/verifyOTP', {
+                method: 'POST',
+                body: formData
+            });
+
+            const data = await res.json();
+            if (data.status === 'success') {
+                messageDiv.innerHTML = "<h3>✅ Dual-Factor Authentication Successful</h3>";
+            } else {
+                messageDiv.innerHTML = "<p style='color: red;'>❌ " + data.error + "</p>";
+            }
+        });
+    </script>
+</body>
+</html>
